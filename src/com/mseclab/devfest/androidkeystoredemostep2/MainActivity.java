@@ -123,21 +123,22 @@ public class MainActivity extends Activity {
 
 		private KeyStore keyStore = null;
 		private KeyStore.Entry entry = null;
-		
+
 		private void accediChiavi() {
 			// TODO Auto-generated method stub
 			keyStore = initKeyStore();
 			entry = dammiElementoDalKeystore();
-			debug("Certtificate Type: " + ((KeyStore.PrivateKeyEntry) entry).getCertificate().getType());
+			debug("Certtificate Type: "
+					+ ((KeyStore.PrivateKeyEntry) entry).getCertificate()
+							.getType());
 			debug(entry.toString());
-			
-			
+
 		}
 
 		// Load the key pair from the Android Key Store
-        private KeyStore.Entry dammiElementoDalKeystore(){
-        	KeyStore.Entry entry = null;
-        	try {
+		private KeyStore.Entry dammiElementoDalKeystore() {
+			KeyStore.Entry entry = null;
+			try {
 				entry = keyStore.getEntry(ALIAS, null);
 			} catch (NoSuchAlgorithmException e) {
 				// TODO Auto-generated catch block
@@ -149,11 +150,10 @@ public class MainActivity extends Activity {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-            return entry;
-        	
-        }
-		
-        
+			return entry;
+
+		}
+
 		private KeyStore initKeyStore() {
 			KeyStore keyStore = null;
 			// Init KeyStore
