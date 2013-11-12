@@ -1,4 +1,4 @@
-package com.mseclab.devfest.androidkeystoredemostep1;
+package com.mseclab.devfest.androidkeystoredemostep2;
 
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
