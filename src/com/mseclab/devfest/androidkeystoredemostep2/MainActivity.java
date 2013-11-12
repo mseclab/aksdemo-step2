@@ -1,13 +1,18 @@
 package com.mseclab.devfest.androidkeystoredemostep2;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateException;
 import java.util.Calendar;
 
 import javax.security.auth.x500.X500Principal;
@@ -73,6 +78,7 @@ public class MainActivity extends Activity {
 			View.OnClickListener {
 
 		private Button mGenChiaviButton;
+		private Button mAccChiaviButton;
 		private TextView mDebugText;
 		ProgressDialog progressdialog;
 
@@ -89,6 +95,11 @@ public class MainActivity extends Activity {
 			mGenChiaviButton = (Button) rootView
 					.findViewById(R.id.generate_button);
 			mGenChiaviButton.setOnClickListener(this);
+
+			mAccChiaviButton = (Button) rootView
+					.findViewById(R.id.access_button);
+			mAccChiaviButton.setOnClickListener(this);
+
 			mDebugText = (TextView) rootView.findViewById(R.id.debugText);
 
 			return rootView;
@@ -102,12 +113,72 @@ public class MainActivity extends Activity {
 				debug("Cliccato Genera chiavi");
 				generaChiavi();
 				break;
+			case R.id.access_button:
+				debug("Accedi alle chiavi");
+				accediChiavi();
+				break;
 			}
+
 		}
 
-		private void generaChiavi(){
+		private KeyStore keyStore = null;
+		private KeyStore.Entry entry = null;
+		
+		private void accediChiavi() {
+			// TODO Auto-generated method stub
+			keyStore = initKeyStore();
+			entry = dammiElementoDalKeystore();
+			debug("Certtificate Type: " + ((KeyStore.PrivateKeyEntry) entry).getCertificate().getType());
+			debug(entry.toString());
+			
+			
+		}
+
+		// Load the key pair from the Android Key Store
+        private KeyStore.Entry dammiElementoDalKeystore(){
+        	KeyStore.Entry entry = null;
+        	try {
+				entry = keyStore.getEntry(ALIAS, null);
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnrecoverableEntryException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (KeyStoreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            return entry;
+        	
+        }
+		
+        
+		private KeyStore initKeyStore() {
+			KeyStore keyStore = null;
+			// Init KeyStore
+			try {
+				keyStore = KeyStore.getInstance("AndroidKeyStore");
+			} catch (KeyStoreException e) {
+				debug("KeyStore Exception Error: " + e);
+				return null;
+			}
+
+			try {
+				keyStore.load(null);
+			} catch (NoSuchAlgorithmException e) {
+				debug(e.toString());
+			} catch (CertificateException e) {
+				debug(e.toString());
+			} catch (IOException e) {
+				debug(e.toString());
+			}
+			return keyStore;
+		}
+
+		private void generaChiavi() {
 			new AsyncTask<Void, String, Void>() {
-				
+
 				@Override
 				protected Void doInBackground(Void... params) {
 					// TODO Auto-generated method stub
@@ -135,16 +206,17 @@ public class MainActivity extends Activity {
 								"AndroidKeyStore");
 						kpGenerator.initialize(spec);
 						kp = kpGenerator.generateKeyPair();
-						
-						
+
 						publishProgress("Generated key pair : " + kp.toString());
 						PublicKey publickey = kp.getPublic();
 						PrivateKey privateKey = kp.getPrivate();
-						publishProgress("Formato della chiave pubblica : " + publickey.getFormat());
-						publishProgress("Algoritmo utilizzato : " + publickey.getAlgorithm());
-						if(privateKey.getEncoded()==null)
+						publishProgress("Formato della chiave pubblica : "
+								+ publickey.getFormat());
+						publishProgress("Algoritmo utilizzato : "
+								+ publickey.getAlgorithm());
+						if (privateKey.getEncoded() == null)
 							publishProgress("Non possibile accedere direttamente alla chiave privata :-(");
-						
+
 					} catch (NoSuchAlgorithmException e) {
 						debug(e.toString());
 					} catch (NoSuchProviderException e) {
@@ -154,26 +226,26 @@ public class MainActivity extends Activity {
 					}
 					return null;
 				}
-				
-				 protected void onProgressUpdate(String... values) {
-				     debug(values[0]);
-				 }
+
+				protected void onProgressUpdate(String... values) {
+					debug(values[0]);
+				}
 
 				@Override
-		        protected void onPostExecute(Void result) {
-		            // TODO Auto-generated method stub
+				protected void onPostExecute(Void result) {
+					// TODO Auto-generated method stub
 					progressdialog.dismiss();
-					
-		        }
+
+				}
+
 				@Override
-		        protected void onPreExecute() {
-					progressdialog = ProgressDialog.show(getActivity(),"Please wait..." , "Generating keys...");
-		        }
-				
+				protected void onPreExecute() {
+					progressdialog = ProgressDialog.show(getActivity(),
+							"Please wait...", "Generating keys...");
+				}
+
 			}.execute();
-			
-			
-			
+
 		}
 
 		private void debug(String message) {
